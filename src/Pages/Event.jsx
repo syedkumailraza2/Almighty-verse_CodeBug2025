@@ -51,7 +51,20 @@ const AllEvents = () => {
   }
 
 
-  
+  const downloadFile = (url) => {
+    const link = document.createElement("a");
+    link.href = url;
+
+    // Extract file name from the URL
+    const fileName = url.split("/").pop().split("?")[0]; // Handles Cloudinary URLs with query params
+    link.download = fileName; // Set dynamic file name
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
+
 
   return (
     <div className="bg-black min-h-screen p-6 text-white">
@@ -90,14 +103,13 @@ const AllEvents = () => {
                         Register Now
                       </a>
                       
-                      <a 
-                        href={event.brochure} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="cursor-pointer bg-black hover:bg-gray-800 text-white text-sm px-4 py-2 rounded-full"
-                      >
-                        Download Brochure
-                      </a>
+                      <a  
+  onClick={() => downloadFile(event.brochure)} 
+  className="cursor-pointer bg-black hover:bg-gray-800 text-white text-sm px-4 py-2 rounded-full"
+>
+  Download Brochure
+</a>
+
                     </div>
                   </div>
                 
