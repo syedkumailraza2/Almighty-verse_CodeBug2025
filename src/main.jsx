@@ -8,7 +8,7 @@ import Notesview from './Pages/Notesview.jsx'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter>
-     <Notesview/> 
+     <App/> 
     
   </BrowserRouter>
 )
