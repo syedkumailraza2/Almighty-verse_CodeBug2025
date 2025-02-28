@@ -6,6 +6,7 @@ import Thirdparty from './Pages/Thirdparty'
 import SearchPartner from './Pages/SearchPartner'
 import Inbox from './Pages/Inbox'
 import AllEvents from './Pages/Event'
+import Addnotes from './Pages/Addnotes'
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/search-partner" element={<SearchPartner/>} />
         <Route path="/request-box" element={<Inbox/>} />
         <Route path="/event-calendar" element={<AllEvents/>} />
+        <Route path="/student-desk" element={<Addnotes/>} />
       </Routes>
     </div>
   )
