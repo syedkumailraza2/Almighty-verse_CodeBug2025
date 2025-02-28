@@ -9,6 +9,7 @@ import AllEvents from './Pages/Event'
 import Addnotes from './Pages/Addnotes'
 import NotesView from './Pages/Notesview'
 import StudentDesk from './Pages/Studentdesk'
+import AiMentor from './Pages/AiMentor'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/event-calendar" element={<AllEvents/>} />
         <Route path="/student-desk" element={<StudentDesk/>} />
         <Route path="/notes" element={<NotesView/>} />
+        <Route path="/ai-mentor" element={<AiMentor/>} />
       </Routes>
     </div>
   )

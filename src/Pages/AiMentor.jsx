@@ -39,7 +39,7 @@ const AiMentor = () => {
           {/* External Iframe */}
           <div className="w-full h-full">
             <iframe
-              src="https://files.bpcontent.cloud/2025/02/28/11/20250228110555-100AJ0WA.html"
+              src="https://cdn.botpress.cloud/webchat/v2.2/shareable.html?configUrl=https://files.bpcontent.cloud/2025/02/28/11/20250228113041-58O4A7HB.json"
               className="w-full h-full border-0"
               title="External Content"
             ></iframe>
