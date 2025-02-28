@@ -1,6 +1,123 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { PlusCircle, Edit, Pencil, Trash } from 'lucide-react';
 
 function Home() {
+    const API_PORT = import.meta.env.VITE_API_PORT || 8000;
+    const BASE_URL = `http://localhost:${API_PORT}/projects`;
+    
+    const [projects, setProjects] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [showForm, setShowForm] = useState(false);
+    const [editingProjectId, setEditingProjectId] = useState(null);
+    const [formData, setFormData] = useState({
+        title: '',
+        description: '',
+        image: null,
+        projectUrl: ''
+    });
+
+    useEffect(() => {
+        fetchProjects();
+    }, []);
+
+    const fetchProjects = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(BASE_URL);
+            setProjects(response.data);
+        } catch (error) {
+            console.error("Error fetching projects:", error);
+            alert("Failed to fetch projects!");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleInputChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleFileChange = (e) => {
+        setFormData({ ...formData, image: e.target.files[0] });
+    };
+
+    const handleUpload = async (e) => {
+        e.preventDefault();
+        
+        if (!formData.title || !formData.description || !formData.projectUrl) {
+            alert("Please fill all required fields!");
+            return;
+        }
+
+        const data = new FormData();
+        data.append("title", formData.title);
+        data.append("description", formData.description);
+        data.append("projectUrl", formData.projectUrl);
+        if (formData.image) data.append("image", formData.image);
+
+        try {
+            setLoading(true);
+
+            if (editingProjectId) {
+                await axios.put(`${BASE_URL}/${editingProjectId}`, data, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                });
+                alert("Project updated successfully!");
+            } else {
+                await axios.post(BASE_URL, data, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                });
+                alert("Project added successfully!");
+            }
+
+            resetForm();
+            fetchProjects();
+        } catch (error) {
+            console.error("Upload failed:", error.response?.data || error.message);
+            alert(`Failed to ${editingProjectId ? "update" : "upload"} project!`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const resetForm = () => {
+        setShowForm(false);
+        setFormData({ title: "", description: "", image: null, projectUrl: "" });
+        setEditingProjectId(null);
+    };
+
+    const handleEdit = (project, e) => {
+        e.stopPropagation(); // Prevent opening the project URL
+        
+        setShowForm(true);
+        setFormData({
+            title: project.title,
+            description: project.description,
+            image: null, // Can't pre-fill file input
+            projectUrl: project.projectUrl,
+        });
+        setEditingProjectId(project._id);
+    };
+
+    const handleDelete = async (id, e) => {
+        e.stopPropagation(); // Prevent opening the project URL
+        
+        if (!window.confirm("Are you sure you want to delete this project?")) return;
+
+        try {
+            setLoading(true);
+            await axios.delete(`${BASE_URL}/${id}`);
+            alert("Project deleted successfully!");
+            fetchProjects();
+        } catch (error) {
+            console.error("Delete failed:", error.response?.data || error.message);
+            alert("Failed to delete project!");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className='text-[#fff] bg-[#000] px-12 py-10'>
           <div className="min-h-screen bg-[#111111] text-white p-4 rounded-xl">
@@ -20,8 +137,8 @@ function Home() {
                 </div>
     
                 <div className="flex gap-2 mb-6">
-                  <button className="bg-white font-semibold text-black rounded-full px-4 py-2">
-                    Edit Profile
+                  <button className="bg-white font-semibold text-black rounded-full px-4 py-2 flex items-center gap-2">
+                    <Edit size={16} /> Edit Profile
                   </button>
                   <button className="bg-red-500 text-white rounded-full px-4 py-2 font-semibold">
                     Logout
@@ -110,28 +227,143 @@ function Home() {
                 <div>
                   <div className="flex items-center gap-2 mb-6">
                     <h2 className="text-5xl font-medium text-green-500">Projects</h2>
-                    <button className="text-green-500 text-3xl">+</button>
+                    <button 
+                      onClick={() => {
+                        resetForm();
+                        setShowForm(true);
+                      }}
+                      className="text-green-500 text-3xl flex items-center justify-center"
+                      aria-label="Add new project"
+                    >
+                      <PlusCircle size={28} />
+                    </button>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {[1, 2, 3].map((item) => (
-                      <div key={item} className="bg-white rounded-lg overflow-hidden">
-                        <img src="/campus-autumn.jpg" alt="Project" className="w-full h-48 object-cover" />
-                        <div className="p-4 text-black">
-                          <h3 className="text-xl font-semibold mb-2">Winner Of PIXEL Hackathon</h3>
-                          <p>
-                            Abhishek Khatale is a UI/UX designer, web developer, and entrepreneur with a passion for
-                            innovation.
-                          </p>
+
+                  {/* Projects Grid */}
+                  {loading && !showForm ? (
+                    <div className="flex justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {projects.length === 0 ? (
+                        <div className="col-span-3 text-center py-8 text-gray-400">
+                          No projects yet. Click the + button to add your first project!
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ) : (
+                        projects.map((project) => (
+                          <div 
+                            key={project._id} 
+                            className="bg-black rounded-lg overflow-hidden relative group cursor-pointer"
+                            onClick={() => window.open(project.projectUrl, "_blank")}
+                          >
+                            <img 
+                              src={project.imageUrl || "profilepic.jpg"} 
+                              alt={project.title} 
+                              className="w-full h-48 object-cover" 
+                            />
+                            <div className="p-4">
+                              <h3 className="text-xl font-semibold mb-2 truncate">{project.title}</h3>
+                              <p className="text-gray-400 line-clamp-2">{project.description}</p>
+                            </div>
+                            
+                            {/* Edit & Delete Buttons */}
+                            <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <button 
+                                onClick={(e) => handleEdit(project, e)} 
+                                className="bg-blue-500 hover:bg-blue-400 text-white p-1 rounded-full"
+                                aria-label="Edit project"
+                              >
+                                <Pencil size={16} />
+                              </button>
+                              <button 
+                                onClick={(e) => handleDelete(project._id, e)} 
+                                className="bg-red-500 hover:bg-red-400 text-white p-1 rounded-full"
+                                aria-label="Delete project"
+                              >
+                                <Trash size={16} />
+                              </button>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           </div>
+          
+          {/* Project Form Modal */}
+          {showForm && (
+            <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-80 z-50">
+              <div className="bg-[#111] p-6 rounded-xl w-full max-w-md">
+                <h2 className="text-xl font-bold text-green-500 mb-4">
+                  {editingProjectId ? "Edit Project" : "Add Project"}
+                </h2>
+                <form onSubmit={handleUpload}>
+                  <div className="space-y-3">
+                    <input 
+                      type="text" 
+                      name="title" 
+                      placeholder="Project Title *" 
+                      value={formData.title} 
+                      onChange={handleInputChange} 
+                      className="w-full p-2 bg-black rounded-lg text-white" 
+                      required
+                    />
+                    <textarea 
+                      name="description" 
+                      placeholder="Project Description *" 
+                      value={formData.description} 
+                      onChange={handleInputChange} 
+                      className="w-full p-2 bg-black rounded-lg text-white min-h-24" 
+                      required
+                    ></textarea>
+                    <input 
+                      type="url" 
+                      name="projectUrl" 
+                      placeholder="Project URL * (https://...)" 
+                      value={formData.projectUrl} 
+                      onChange={handleInputChange} 
+                      className="w-full p-2 bg-black rounded-lg text-white" 
+                      required
+                    />
+                    <div>
+                      <label className="block text-gray-400 text-sm mb-1">Project Image</label>
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={handleFileChange} 
+                        className="w-full p-2 bg-black text-white rounded-lg" 
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-3 mt-6">
+                    <button 
+                      type="button" 
+                      onClick={resetForm} 
+                      className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="submit" 
+                      className="px-4 py-2 bg-green-500 hover:bg-green-400 text-black rounded-lg"
+                      disabled={loading}
+                    >
+                      {loading ? 
+                        "Processing..." : 
+                        editingProjectId ? "Update Project" : "Add Project"
+                      }
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </div>
-      );
+    );
 }
 
-export default Home
+export default Home;
