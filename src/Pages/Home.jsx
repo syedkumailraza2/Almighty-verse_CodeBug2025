@@ -95,10 +95,11 @@ function Home() {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem("token")
-    window.location.href = "/login"
-  }
-
+    localStorage.removeItem("token"); // Remove the token
+    setIsAuthenticated(false); // Set authentication state to false
+    navigate("/home"); // Redirect to login page
+    window.location.reload(); // Reload the current page
+  };
   const handleEditProfile = () => {
     setProfileFormData({
       name: profile.name,
