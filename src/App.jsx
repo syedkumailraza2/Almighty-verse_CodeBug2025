@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate, Outlet } from "react-router-dom";
 import Land from "./Pages/Land";
 import Register from "./Pages/Register";
 import Login from "./Pages/Login";
@@ -12,6 +12,7 @@ import StudentDesk from "./Pages/StudentDesk";
 import NotesView from "./Pages/NotesView";
 import AiMentor from "./Pages/AiMentor";
 import { jwtDecode } from "jwt-decode";
+import Homenavbar from "./Components/Homenavbar";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -48,6 +49,14 @@ function App() {
     }
   }, [navigate]);
 
+  // Layout for authenticated pages (includes Homenavbar)
+  const AuthenticatedLayout = () => (
+    <>
+      <Homenavbar />
+      <Outlet /> {/* This renders the nested routes */}
+    </>
+  );
+
   return (
     <div>
       <Routes>
@@ -69,7 +78,7 @@ function App() {
 
         {/* Protected Routes (Only accessible if authenticated) */}
         {isAuthenticated ? (
-          <>
+          <Route element={<AuthenticatedLayout />}>
             <Route path="/home" element={<Home />} />
             <Route path="/search-partner" element={<SearchPartner />} />
             <Route path="/request-box" element={<Inbox />} />
@@ -77,7 +86,7 @@ function App() {
             <Route path="/student-desk" element={<StudentDesk />} />
             <Route path="/notes" element={<NotesView />} />
             <Route path="/ai-mentor" element={<AiMentor />} />
-          </>
+          </Route>
         ) : (
           // Redirect to login if not authenticated and trying to access protected routes
           <Route path="*" element={<Navigate to="/login" />} />
