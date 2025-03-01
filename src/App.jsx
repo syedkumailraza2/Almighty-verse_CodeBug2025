@@ -6,7 +6,7 @@ import Login from "./Pages/Login";
 import Home from "./Pages/Home";
 import NextReg from "./Pages/NextReg";
 import Homenavbar from "./Components/Homenavbar";
-import SearchPartner from "./Pages/SearchPartner";
+import SearchPartner from "./Pages/SearchPartner"; 
 import Inbox from "./Pages/Inbox";
 import AllEvents from "./Pages/Event";
 import Addnotes from "./Pages/Addnotes";
@@ -39,7 +39,7 @@ function App() {
 
 
         {/* Protected Routes: Accessible Only if Authenticated */}
-        {isAuthenticated ? (
+        {!isAuthenticated ? (
           <>
             <Route path="/home" element={<Home />} />
             <Route path="/search-partner" element={<SearchPartner />} />

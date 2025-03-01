@@ -55,8 +55,32 @@ const Land = () => {
         <div className="flex text-white justify-between px-12 pt-6 items-center mb-64 animate-on-scroll">
           <h1 className="text-4xl">WebRoom</h1>
           <div className="flex text-[#b1b1b1] space-x-6">
-            <button className="text-xl">About Us</button>
-            <button className="text-xl">Contact Us</button>
+            
+          <button
+  className="text-xl"
+  onClick={() => {
+    document.querySelector("#Aboutsection").scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }}
+>
+  About Website
+</button>
+
+<button
+  className="text-xl"
+  onClick={() => {
+    document.querySelector("#Quicklinks").scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }}
+>
+  Quick Links
+</button>
+
+
           </div>
           <div className="flex text-white space-x-2">
             <Link to="/register">
@@ -128,7 +152,7 @@ const Land = () => {
         </div>
 
         {/* About Section */}
-        <h1 className="text-[#fff] mt-40 font-medium text-5xl text-center animate-on-scroll">Abouts</h1>
+        <h1 id="Aboutsection" className="text-[#fff] mt-40 font-medium text-5xl text-center animate-on-scroll">Abouts</h1>
 
         <div className="mt-32 px-60 flex justify-between">
           <div className="flex flex-col space-y-4">
@@ -255,7 +279,7 @@ const Land = () => {
         </div>
 
         {/* Footer */}
-        <footer className="bg-black animate-on-scroll" style={{ transitionDelay: "600ms" }}>
+        <footer id="Quicklinks" className="bg-black animate-on-scroll" style={{ transitionDelay: "600ms" }}>
           <div className="max-w-screen-xl px-4 py-16 mx-auto sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
               <div>
