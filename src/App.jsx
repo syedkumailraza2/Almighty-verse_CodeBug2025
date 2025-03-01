@@ -5,6 +5,7 @@ import Register from "./Pages/Register";
 import Login from "./Pages/Login";
 import Home from "./Pages/Home";
 import NextReg from "./Pages/NextReg";
+import Homenavbar from "./Components/Homenavbar";
 import SearchPartner from "./Pages/SearchPartner";
 import Inbox from "./Pages/Inbox";
 import AllEvents from "./Pages/Event";
@@ -60,25 +61,18 @@ function App() {
   return (
     <div>
       <Routes>
-        {/* Public Routes (Only accessible if NOT authenticated) */}
-        {!isAuthenticated ? (
-          <>
-            <Route path="/" element={<Land />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/NextReg" element={<NextReg />} />
-            <Route
-              path="/login"
-              element={<Login setAuth={() => setIsAuthenticated(true)} />}
-            />
-          </>
-        ) : (
-          // Redirect to home if authenticated and trying to access public routes
-          <Route path="*" element={<Navigate to="/home" />} />
-        )}
+        {/* Landing Page */}
+        <Route path="/" element={<Land />} />
 
-        {/* Protected Routes (Only accessible if authenticated) */}
+        {/* Authentication Pages */}
+        <Route path="/register" element={<Register />} />
+        <Route path="/NextReg" element={<NextReg />} />
+        <Route path="/login" element={<Login setAuth={() => setIsAuthenticated(true)} />} />
+
+
+        {/* Protected Routes: Accessible Only if Authenticated */}
         {isAuthenticated ? (
-          <Route element={<AuthenticatedLayout />}>
+          <>
             <Route path="/home" element={<Home />} />
             <Route path="/search-partner" element={<SearchPartner />} />
             <Route path="/request-box" element={<Inbox />} />
