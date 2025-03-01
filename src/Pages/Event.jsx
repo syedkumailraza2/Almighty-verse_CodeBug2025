@@ -54,17 +54,11 @@ const AllEvents = () => {
   const downloadFile = (url) => {
     const link = document.createElement("a");
     link.href = url;
-
-    // Extract file name from the URL
-    const fileName = url.split("/").pop().split("?")[0]; // Handles Cloudinary URLs with query params
-    link.download = fileName; // Set dynamic file name
-
+    link.setAttribute("download", ""); // Ensures the browser treats it as a file download
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 };
-
-
 
   return (
     <div className="bg-black min-h-screen p-6 text-white">
