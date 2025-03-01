@@ -1,15 +1,16 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom" // Import useLocation
 
 function Homenavbar() {
-  const [active, setActive] = useState("Home")
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [showLeftArrow, setShowLeftArrow] = useState(false)
-  const [showRightArrow, setShowRightArrow] = useState(true)
+  const location = useLocation(); // Get the current location
+  const [active, setActive] = useState("Home"); // Default active state
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(true);
 
-  const scrollContainerRef = useRef(null)
+  const scrollContainerRef = useRef(null);
 
   const menuItems = [
     { name: "Home", path: "/home" },
@@ -19,48 +20,57 @@ function Homenavbar() {
     { name: "Search Partner", path: "/search-partner" },
     { name: "Request Box", path: "/request-box" },
     { name: "Event Calendar", path: "/event-calendar" },
-  ]
+  ];
+
+  // Update active state based on the current path
+  useEffect(() => {
+    const currentPath = location.pathname; // Get the current path
+    const activeItem = menuItems.find((item) => item.path === currentPath);
+    if (activeItem) {
+      setActive(activeItem.name); // Set active state to the current route's name
+    }
+  }, [location.pathname]); // Re-run when the path changes
 
   // Check scroll position to show/hide arrows
   const checkScroll = () => {
-    const container = scrollContainerRef.current
-    if (!container) return
+    const container = scrollContainerRef.current;
+    if (!container) return;
 
-    setShowLeftArrow(container.scrollLeft > 20)
-    setShowRightArrow(container.scrollLeft < container.scrollWidth - container.clientWidth - 20)
-  }
+    setShowLeftArrow(container.scrollLeft > 20);
+    setShowRightArrow(container.scrollLeft < container.scrollWidth - container.clientWidth - 20);
+  };
 
   // Scroll menu left or right
   const scrollMenu = (direction) => {
-    const container = scrollContainerRef.current
-    if (!container) return
+    const container = scrollContainerRef.current;
+    if (!container) return;
 
-    const scrollAmount = 200
+    const scrollAmount = 200;
     const newScrollLeft =
-      direction === "left" ? container.scrollLeft - scrollAmount : container.scrollLeft + scrollAmount
+      direction === "left" ? container.scrollLeft - scrollAmount : container.scrollLeft + scrollAmount;
 
     container.scrollTo({
       left: newScrollLeft,
       behavior: "smooth",
-    })
-  }
+    });
+  };
 
   // Initialize and update scroll indicators
   useEffect(() => {
-    const container = scrollContainerRef.current
-    if (!container) return
+    const container = scrollContainerRef.current;
+    if (!container) return;
 
-    checkScroll()
-    container.addEventListener("scroll", checkScroll)
+    checkScroll();
+    container.addEventListener("scroll", checkScroll);
 
     // Check on resize too
-    window.addEventListener("resize", checkScroll)
+    window.addEventListener("resize", checkScroll);
 
     return () => {
-      container.removeEventListener("scroll", checkScroll)
-      window.removeEventListener("resize", checkScroll)
-    }
-  }, [])
+      container.removeEventListener("scroll", checkScroll);
+      window.removeEventListener("resize", checkScroll);
+    };
+  }, []);
 
   return (
     <>
@@ -227,8 +237,8 @@ function Homenavbar() {
                   to={item.path}
                   key={item.name}
                   onClick={() => {
-                    setActive(item.name)
-                    setIsMenuOpen(false)
+                    setActive(item.name);
+                    setIsMenuOpen(false);
                   }}
                   className={`block py-3 px-4 text-base font-medium font-['Poppins'] border-b border-gray-100 last:border-b-0 ${
                     active === item.name ? "text-[#88EB63] bg-black" : "text-black hover:bg-gray-100"
@@ -249,8 +259,7 @@ function Homenavbar() {
         }
       `}</style>
     </>
-  )
+  );
 }
 
-export default Homenavbar
-
+export default Homenavbar;
