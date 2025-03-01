@@ -1,104 +1,77 @@
-import React from 'react'
+import React from 'react';
+import { Video, User } from 'lucide-react';
 
-function Inbox() {
-    return (
-        <div className='text-[#fff] bg-[#000000] px-12 py-10'>
-          <div className="min-h-screen bg-[#0a0a0a] text-white p-6 rounded-xl">
-            <div className="max-w-6xl mx-auto">
-              {/* Search and Filter Section */}
-              <div className="flex flex-col md:flex-row gap-4 mb-8">
-                {/* Search Bar */}
-                <div className="relative flex-grow">
-                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 text-gray-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                      />
-                    </svg>
+const Inbox = () => {
+  const notifications = [
+    {
+      id: 1,
+      type: 'meeting',
+      sender: 'Abhishek Khatale',
+      message: 'Sent Meeting Invitation',
+      actions: ['accept'],
+    },
+    {
+      id: 2,
+      type: 'partner',
+      sender: 'Abhishek Khatale',
+      message: 'Sent You Partner Request',
+      actions: ['accept', 'view'],
+    },
+  ];
+
+  const renderIcon = (type) => {
+    switch (type) {
+      case 'meeting':
+        return <Video className="w-6 h-6 text-white" />;
+      case 'partner':
+        return <User className="w-6 h-6 text-white" />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-black text-white">
+      {/* Main content */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
+        <div className="bg-[#141414] rounded-lg p-6 mt-4">
+          <h1 className="text-3xl font-bold mb-6">Inbox</h1>
+
+          <div className="space-y-4">
+            {notifications.map((notification) => (
+              <div
+                key={notification.id}
+                className="flex items-center justify-between py-3  "
+              >
+                <div className="flex items-center">
+                  <div className="mr-4 w-10 h-10 rounded-full  flex items-center justify-center">
+                    {renderIcon(notification.type)}
                   </div>
-                  <input
-                    type="text"
-                    placeholder="Search"
-                    className="w-full pl-10 pr-4 py-3 bg-black rounded-full focus:outline-none focus:ring-1 focus:ring-green-500"
-                  />
-                </div>
-    
-                {/* Filter Buttons */}
-                <div className="flex flex-wrap gap-2">
-                  <button className="px-6 py-3 bg-black font-semibold rounded-full text-[#88EB63] hover:bg-gray-900">
-                    Course
-                  </button>
-                  <button className="px-6 py-3 bg-black font-semibold rounded-full text-[#88EB63] hover:bg-gray-900">
-                    Year
-                  </button>
-                  <button className="px-6 py-3 bg-black font-semibold rounded-full text-[#88EB63] hover:bg-gray-900">
-                    Skill
-                  </button>
-                  <button className="px-6 py-3 bg-black font-semibold rounded-full text-[#88EB63] hover:bg-gray-900">
-                    Designation
-                  </button>
-                </div>
-              </div>
-    
-              {/* User List */}
-              <div className="space-y-4">
-                {/* User 1 */}
-                <div className="flex items-center justify-between rounded-lg p-4">
-                  <div className="flex items-center gap-4">
-                    <img src="profilepic.jpg" alt="Profile" className="w-12 h-12 rounded-full object-cover" />
-                    <div>
-                      <h3 className="font-medium">Abhishek Khatale</h3>
-                      <p className="text-gray-400 text-sm">1234567</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <button className="px-4 py-2 bg-black rounded-full text-[#88EB63] hover:bg-[#141414] font-semibold">
-                      Visit Profile
-                    </button>
-                    <button className="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 font-semibold">
-                      Delete
-                    </button>
-                    <button className="px-4 py-2 bg-[#88EB63] text-white rounded-full hover:bg-green-600 font-semibold">
-                      Approve
-                    </button>
+                  <div>
+                    <p className="text-xl">
+                      {notification.sender} {notification.message}
+                    </p>
                   </div>
                 </div>
-    
-                {/* User 2 */}
-                <div className="flex items-center justify-between rounded-lg p-4">
-                  <div className="flex items-center gap-4">
-                    <img src="profilepic.jpg" alt="Profile" className="w-12 h-12 rounded-full object-cover" />
-                    <div>
-                      <h3 className="font-medium">Abhishek Khatale</h3>
-                      <p className="text-gray-400 text-sm">1234567</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <button className="px-4 py-2 bg-black rounded-full text-[#88EB63] hover:bg-[#141414] font-semibold">
-                      Visit Profile
+                <div className="flex space-x-2">
+                  {notification.actions.includes('accept') && (
+                    <button className="px-4 py-2 bg-white text-black rounded-full hover:bg-gray-200 transition-colors font-semibold">
+                      Accept
                     </button>
-                    <button className="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 font-semibold">
-                      Delete
+                  )}
+                  {notification.actions.includes('view') && (
+                    <button className="px-4 py-2 bg-[#88EB63] text-black rounded-full hover:bg-[#87eb63a7] transition-colors font-semibold">
+                      View Profile
                     </button>
-                    <button className="px-4 py-2 bg-[#88EB63] text-white rounded-full hover:bg-green-600 font-semibold">
-                      Approve
-                    </button>
-                  </div>
+                  )}
                 </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
-      );
-}
+      </div>
+    </div>
+  );
+};
 
-export default Inbox
+export default Inbox;
