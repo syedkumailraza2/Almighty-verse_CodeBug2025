@@ -37,6 +37,7 @@ function App() {
         <Route path="/NextReg" element={<NextReg />} />
         <Route path="/login" element={<Login setAuth={() => setIsAuthenticated(true)} />} />
 
+
         {/* Protected Routes: Accessible Only if Authenticated */}
         {isAuthenticated ? (
           <>

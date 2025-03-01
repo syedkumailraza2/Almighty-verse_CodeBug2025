@@ -19,7 +19,7 @@ function Home() {
     designation: "",
     skills: [],
     image: "",
-    bio: "", // Add bio field
+    bio: "",
   })
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(false)
@@ -31,9 +31,8 @@ function Home() {
     image: null,
     projectUrl: "",
   })
-  const [showProfileForm, setShowProfileForm] = useState(false) // State for profile form visibility
+  const [showProfileForm, setShowProfileForm] = useState(false)
   const [profileFormData, setProfileFormData] = useState({
-    // State for profile form data
     name: "",
     email: "",
     prn_no: "",
@@ -43,24 +42,30 @@ function Home() {
     designation: "",
     skills: "",
     image: null,
-    bio: "", // Add bio field
+    bio: "",
   })
 
   useEffect(() => {
-    fetchProfile()
-    fetchProjects()
+    const token = localStorage.getItem("token")
+    if (token) {
+      fetchProfile()
+      fetchProjects()
+    } else {
+      // Redirect to login if no token is found
+      window.location.href = "/login"
+    }
   }, [])
 
   const fetchProfile = async () => {
     try {
-      const token = localStorage.getItem("token") // Retrieve token from local storage
+      const token = localStorage.getItem("token")
       if (!token) {
         throw new Error("No token found. Please log in.")
       }
 
       const response = await axios.get(PROFILE_URL, {
         headers: {
-          Authorization: `Bearer ${token}`, // Include token in the request headers
+          Authorization: `Bearer ${token}`,
         },
       })
       setProfile(response.data)
@@ -90,14 +95,11 @@ function Home() {
   }
 
   const handleLogout = () => {
-    // Clear the token from local storage
     localStorage.removeItem("token")
-    // Redirect to the login page
     window.location.href = "/login"
   }
 
   const handleEditProfile = () => {
-    // Populate the profile form with current profile data
     setProfileFormData({
       name: profile.name,
       email: profile.email,
@@ -106,11 +108,11 @@ function Home() {
       course: profile.course,
       year: profile.year,
       designation: profile.designation,
-      skills: profile.skills.join(", "), // Convert array to comma-separated string
+      skills: profile.skills.join(", "),
       image: null,
-      bio: profile.bio || "", // Add bio field
+      bio: profile.bio || "",
     })
-    setShowProfileForm(true) // Show the profile form
+    setShowProfileForm(true)
   }
 
   const handleProfileInputChange = (e) => {
@@ -122,49 +124,47 @@ function Home() {
   }
 
   const handleProfileSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
   
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token")
       if (!token) {
-        throw new Error("No token found. Please log in.");
+        throw new Error("No token found. Please log in.")
       }
   
-      // Ensure profile ID exists before proceeding
       if (!profile._id) {
-        throw new Error("Profile ID is missing. Please refresh and try again.");
+        throw new Error("Profile ID is missing. Please refresh and try again.")
       }
   
-      const profileId = profile._id; // Use profile state instead of fetching again
+      const profileId = profile._id
   
-      const data = new FormData();
-      data.append("name", profileFormData.name);
-      data.append("email", profileFormData.email);
-      data.append("prn_no", profileFormData.prn_no);
-      data.append("phone_no", profileFormData.phone_no);
-      data.append("course", profileFormData.course);
-      data.append("year", profileFormData.year);
-      data.append("designation", profileFormData.designation);
-      data.append("skills", JSON.stringify(profileFormData.skills.split(",").map((skill) => skill.trim())));
-      data.append("bio", profileFormData.bio);
-      if (profileFormData.image) data.append("image", profileFormData.image);
+      const data = new FormData()
+      data.append("name", profileFormData.name)
+      data.append("email", profileFormData.email)
+      data.append("prn_no", profileFormData.prn_no)
+      data.append("phone_no", profileFormData.phone_no)
+      data.append("course", profileFormData.course)
+      data.append("year", profileFormData.year)
+      data.append("designation", profileFormData.designation)
+      data.append("skills", JSON.stringify(profileFormData.skills.split(",").map((skill) => skill.trim())))
+      data.append("bio", profileFormData.bio)
+      if (profileFormData.image) data.append("image", profileFormData.image)
   
       const response = await axios.put(`http://localhost:${API_PORT}/student/update/${profileId}`, data, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
         },
-      });
+      })
   
-      setProfile(response.data);
-      alert("Profile updated successfully!");
-      setShowProfileForm(false);
+      setProfile(response.data)
+      alert("Profile updated successfully!")
+      setShowProfileForm(false)
     } catch (error) {
-      console.error("Error updating profile:", error);
-      alert(`Failed to update profile: ${error.response?.data?.message || error.message}`);
+      console.error("Error updating profile:", error)
+      alert(`Failed to update profile: ${error.response?.data?.message || error.message}`)
     }
-  };
-  
+  }
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -220,20 +220,20 @@ function Home() {
   }
 
   const handleEdit = (project, e) => {
-    e.stopPropagation() // Prevent opening the project URL
+    e.stopPropagation()
 
     setShowForm(true)
     setFormData({
       title: project.title,
       description: project.description,
-      image: null, // Can't pre-fill file input
+      image: null,
       projectUrl: project.projectUrl,
     })
     setEditingProjectId(project._id)
   }
 
   const handleDelete = async (id, e) => {
-    e.stopPropagation() // Prevent opening the project URL
+    e.stopPropagation()
 
     if (!window.confirm("Are you sure you want to delete this project?")) return
 
@@ -609,5 +609,4 @@ function Home() {
   )
 }
 
-export default Home;
-
+export default Home
