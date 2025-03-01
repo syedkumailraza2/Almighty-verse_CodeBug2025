@@ -23,11 +23,10 @@ const Login = ({ setAuth }) => { // ✅ Accept setAuth as a prop
       );
 
       if (response.status === 200) {
-        localStorage.setItem("token", response.data.token); // ✅ Save JWT token
+        localStorage.setItem("token", response.data.token); // Save JWT token
         alert("Login Successful!");
-
-        setAuth(true); // ✅ Update authentication state
-        navigate("/home"); // ✅ Redirect to Home
+        setAuth(true); // Update authentication state
+        navigate("/home"); // Redirect to Home
       }
     } catch (error) {
       console.error("Login Error:", error);

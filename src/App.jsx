@@ -5,40 +5,69 @@ import Register from "./Pages/Register";
 import Login from "./Pages/Login";
 import Home from "./Pages/Home";
 import NextReg from "./Pages/NextReg";
-import Homenavbar from "./Components/Homenavbar";
 import SearchPartner from "./Pages/SearchPartner";
 import Inbox from "./Pages/Inbox";
 import AllEvents from "./Pages/Event";
-import Addnotes from "./Pages/Addnotes";
-import StudentDesk from "./Pages/StudentDesk"; // Ensure correct import
-import NotesView from "./Pages/NotesView"; // Ensure correct import
-import AiMentor from "./Pages/AiMentor"; // Ensure correct import
+import StudentDesk from "./Pages/StudentDesk";
+import NotesView from "./Pages/NotesView";
+import AiMentor from "./Pages/AiMentor";
+import { jwtDecode } from "jwt-decode";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
 
+  // Function to handle logout
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // Remove the token
+    setIsAuthenticated(false); // Set authentication state to false
+    navigate("/login"); // Redirect to login page
+    window.location.reload(); // Reload the current page
+  };
+
   useEffect(() => {
-    // ✅ Check if user is already logged in (JWT token exists)
     const token = localStorage.getItem("token");
+
     if (token) {
-      setIsAuthenticated(true);
+      try {
+        const decodedToken = jwtDecode(token);
+        const currentTime = Date.now() / 1000; // Convert to seconds
+
+        if (decodedToken.exp > currentTime) {
+          setIsAuthenticated(true); // Token is valid
+        } else {
+          // Token is expired, log the user out
+          handleLogout();
+        }
+      } catch (error) {
+        console.error("Error decoding token:", error);
+        handleLogout();
+      }
+    } else {
+      setIsAuthenticated(false); // No token found
     }
-  }, []);
+  }, [navigate]);
 
   return (
     <div>
       <Routes>
-        {/* Landing Page */}
-        <Route path="/" element={<Land />} />
+        {/* Public Routes (Only accessible if NOT authenticated) */}
+        {!isAuthenticated ? (
+          <>
+            <Route path="/" element={<Land />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/NextReg" element={<NextReg />} />
+            <Route
+              path="/login"
+              element={<Login setAuth={() => setIsAuthenticated(true)} />}
+            />
+          </>
+        ) : (
+          // Redirect to home if authenticated and trying to access public routes
+          <Route path="*" element={<Navigate to="/home" />} />
+        )}
 
-        {/* Authentication Pages */}
-        <Route path="/register" element={<Register />} />
-        <Route path="/NextReg" element={<NextReg />} />
-        <Route path="/login" element={<Login setAuth={() => setIsAuthenticated(true)} />} />
-
-
-        {/* Protected Routes: Accessible Only if Authenticated */}
+        {/* Protected Routes (Only accessible if authenticated) */}
         {isAuthenticated ? (
           <>
             <Route path="/home" element={<Home />} />
@@ -50,6 +79,7 @@ function App() {
             <Route path="/ai-mentor" element={<AiMentor />} />
           </>
         ) : (
+          // Redirect to login if not authenticated and trying to access protected routes
           <Route path="*" element={<Navigate to="/login" />} />
         )}
       </Routes>
