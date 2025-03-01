@@ -5,7 +5,6 @@ import Register from "./Pages/Register";
 import Login from "./Pages/Login";
 import Home from "./Pages/Home";
 import NextReg from "./Pages/NextReg";
-import Homenavbar from "./Components/Homenavbar";
 import SearchPartner from "./Pages/SearchPartner";
 import Inbox from "./Pages/Inbox";
 import AllEvents from "./Pages/Event";
@@ -14,6 +13,7 @@ import NotesView from "./Pages/NotesView";
 import AiMentor from "./Pages/AiMentor";
 import { jwtDecode } from "jwt-decode";
 import Homenavbar from "./Components/Homenavbar";
+import Thirdparty from "./Pages/Thirdparty";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -61,18 +61,25 @@ function App() {
   return (
     <div>
       <Routes>
-        {/* Landing Page */}
-        <Route path="/" element={<Land />} />
-
-        {/* Authentication Pages */}
-        <Route path="/register" element={<Register />} />
-        <Route path="/NextReg" element={<NextReg />} />
-        <Route path="/login" element={<Login setAuth={() => setIsAuthenticated(true)} />} />
-
-
-        {/* Protected Routes: Accessible Only if Authenticated */}
-        {isAuthenticated ? (
+        {/* Public Routes (Only accessible if NOT authenticated) */}
+        {!isAuthenticated ? (
           <>
+            <Route path="/" element={<Land />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/NextReg" element={<NextReg />} />
+            <Route
+              path="/login"
+              element={<Login setAuth={() => setIsAuthenticated(true)} />}
+            />
+          </>
+        ) : (
+          // Redirect to home if authenticated and trying to access public routes
+          <Route path="*" element={<Navigate to="/home" />} />
+        )}
+
+        {/* Protected Routes (Only accessible if authenticated) */}
+        {isAuthenticated ? (
+          <Route element={<AuthenticatedLayout />}>
             <Route path="/home" element={<Home />} />
             <Route path="/search-partner" element={<SearchPartner />} />
             <Route path="/request-box" element={<Inbox />} />
@@ -80,6 +87,7 @@ function App() {
             <Route path="/student-desk" element={<StudentDesk />} />
             <Route path="/notes" element={<NotesView />} />
             <Route path="/ai-mentor" element={<AiMentor />} />
+            <Route path="/thirdparty/:id" element={<Thirdparty/>} />
           </Route>
         ) : (
           // Redirect to login if not authenticated and trying to access protected routes

@@ -63,7 +63,7 @@ const NextReg = () => {
 
       if (response.data.success) {
         alert("Registration successful!");
-        navigate("/login");
+        navigate("/login"); // Redirect to login page
       } else {
         alert(response.data.message);
       }
