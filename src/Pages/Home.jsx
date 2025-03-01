@@ -10,6 +10,7 @@ function Home() {
   const PROFILE_URL = `http://localhost:${API_PORT}/student/profile`
 
   const [profile, setProfile] = useState({
+    _id: "", // Ensure _id is part of the initial state
     name: "",
     email: "",
     prn_no: "",
@@ -17,7 +18,7 @@ function Home() {
     course: "",
     year: "",
     designation: "",
-    skills: [],
+    skills: [], // Ensure skills is an array
     image: "",
     bio: "",
   })
@@ -58,29 +59,47 @@ function Home() {
 
   const fetchProfile = async () => {
     try {
-      const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token");
       if (!token) {
-        throw new Error("No token found. Please log in.")
+        throw new Error("No token found. Please log in.");
       }
-
+  
       const response = await axios.get(PROFILE_URL, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      })
-      setProfile(response.data)
+      });
+  
+      // Parse skills if it's a string
+      const profileData = response.data;
+      if (typeof profileData.skills === "string") {
+        try {
+          profileData.skills = JSON.parse(profileData.skills);
+        } catch (error) {
+          console.error("Failed to parse skills:", error);
+          profileData.skills = []; // Fallback to an empty array if parsing fails
+        }
+      }
+  
+      // Clean skills (remove double quotes and extra spaces)
+      if (Array.isArray(profileData.skills)) {
+        profileData.skills = profileData.skills.map((skill) =>
+          skill.replace(/"/g, "").trim()
+        );
+      }
+  
+      console.log("Fetched Profile Data:", profileData); // Log the fetched data
+      setProfile(profileData); // Update the profile state
     } catch (error) {
-      console.error("Error fetching profile:", error)
+      console.error("Error fetching profile:", error);
       if (error.response?.status === 401) {
-        alert("Unauthorized! Please log in again.")
-        // Redirect to login page
-        window.location.href = "/login"
+        alert("Unauthorized! Please log in again.");
+        window.location.href = "/login";
       } else {
-        alert("Failed to fetch profile!")
+        alert("Failed to fetch profile!");
       }
     }
-  }
-
+  };
   const fetchProjects = async () => {
     setLoading(true)
     try {
@@ -95,27 +114,25 @@ function Home() {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); // Remove the token
-    setIsAuthenticated(false); // Set authentication state to false
-    navigate("/home"); // Redirect to login page
-    window.location.reload(); // Reload the current page
-  };
-  const handleEditProfile = () => {
-    setProfileFormData({
-      name: profile.name,
-      email: profile.email,
-      prn_no: profile.prn_no,
-      phone_no: profile.phone_no,
-      course: profile.course,
-      year: profile.year,
-      designation: profile.designation,
-      skills: profile.skills.join(", "),
-      image: null,
-      bio: profile.bio || "",
-    })
-    setShowProfileForm(true)
+    localStorage.removeItem("token") // Remove the token
+    window.location.href = "/login" // Redirect to login page
   }
 
+  const handleEditProfile = () => {
+  setProfileFormData({
+    name: profile.name,
+    email: profile.email,
+    prn_no: profile.prn_no,
+    phone_no: profile.phone_no,
+    course: profile.course,
+    year: profile.year,
+    designation: profile.designation,
+    skills: profile.skills.join(", "), // Convert array to string for editing
+    image: null,
+    bio: profile.bio || "",
+  });
+  setShowProfileForm(true);
+};
   const handleProfileInputChange = (e) => {
     setProfileFormData({ ...profileFormData, [e.target.name]: e.target.value })
   }
@@ -125,48 +142,59 @@ function Home() {
   }
 
   const handleProfileSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
   
     try {
-      const token = localStorage.getItem("token")
+      const token = localStorage.getItem("token");
       if (!token) {
-        throw new Error("No token found. Please log in.")
+        throw new Error("No token found. Please log in.");
       }
   
       if (!profile._id) {
-        throw new Error("Profile ID is missing. Please refresh and try again.")
+        throw new Error("Profile ID is missing. Please refresh and try again.");
       }
   
-      const profileId = profile._id
+      // Step 1: Clean the skills string (remove double quotes and extra spaces)
+      const cleanedSkills = profileFormData.skills
+        .replace(/"/g, "") // Remove double quotes
+        .split(",") // Split into array
+        .map((skill) => skill.trim()) // Trim each skill
+        .filter((skill) => skill.length > 0); // Remove empty skills
   
-      const data = new FormData()
-      data.append("name", profileFormData.name)
-      data.append("email", profileFormData.email)
-      data.append("prn_no", profileFormData.prn_no)
-      data.append("phone_no", profileFormData.phone_no)
-      data.append("course", profileFormData.course)
-      data.append("year", profileFormData.year)
-      data.append("designation", profileFormData.designation)
-      data.append("skills", JSON.stringify(profileFormData.skills.split(",").map((skill) => skill.trim())))
-      data.append("bio", profileFormData.bio)
-      if (profileFormData.image) data.append("image", profileFormData.image)
+      // Step 2: Prepare the data for the update
+      const data = new FormData();
+      data.append("name", profileFormData.name);
+      data.append("email", profileFormData.email);
+      data.append("prn_no", profileFormData.prn_no);
+      data.append("phone_no", profileFormData.phone_no);
+      data.append("course", profileFormData.course);
+      data.append("year", profileFormData.year);
+      data.append("designation", profileFormData.designation);
+      data.append("skills", JSON.stringify(cleanedSkills)); // Send cleaned skills as an array
+      data.append("bio", profileFormData.bio);
+      if (profileFormData.image) data.append("image", profileFormData.image);
   
-      const response = await axios.put(`http://localhost:${API_PORT}/student/update/${profileId}`, data, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      })
+      // Step 3: Send the update request
+      const response = await axios.put(
+        `http://localhost:${API_PORT}/student/update/${profile._id}`,
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
   
-      setProfile(response.data)
-      alert("Profile updated successfully!")
-      setShowProfileForm(false)
+      // Step 4: Update the profile state and close the form
+      setProfile(response.data);
+      alert("Profile updated successfully!");
+      setShowProfileForm(false);
     } catch (error) {
-      console.error("Error updating profile:", error)
-      alert(`Failed to update profile: ${error.response?.data?.message || error.message}`)
+      console.error("Error updating profile:", error);
+      alert(`Failed to update profile: ${error.response?.data?.message || error.message}`);
     }
-  }
-
+  };
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
@@ -344,19 +372,29 @@ function Home() {
 
             {/* Skills Section */}
             <div className="mb-12">
-              <div className="flex items-center gap-2 mb-6">
-                <h2 className="text-5xl font-medium text-green-500">Skills</h2>
-                <button className="text-green-500 text-3xl">+</button>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {profile.skills.map((skill, index) => (
-                  <div key={index} className="bg-black rounded-lg p-6 flex flex-col items-center">
-                    <div className="text-xl font-medium">{skill}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
+  <div className="flex items-center gap-2 mb-6">
+    <h2 className="text-5xl font-medium text-green-500">Skills</h2>
+    <button className="text-green-500 text-3xl">+</button>
+  </div>
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    {Array.isArray(profile?.skills) ? (
+      profile.skills
+        .map((skill) => {
+          // Step 1: Remove unwanted characters like [, ], \, and extra spaces
+          const cleanedSkill = skill.replace(/[\[\]\\]/g, "").trim();
+          return cleanedSkill;
+        })
+        .filter((skill) => skill.length > 0) // Filter out empty strings
+        .map((cleanedSkill, index) => (
+          <div key={index} className="bg-black rounded-lg p-6 flex flex-col items-center">
+            <div className="text-xl font-medium">{cleanedSkill}</div>
+          </div>
+        ))
+    ) : (
+      <div className="text-red-500">Invalid skills data</div>
+    )}
+  </div>
+</div>
             {/* Projects Section */}
             <div>
               <div className="flex items-center gap-2 mb-6">
@@ -595,12 +633,18 @@ function Home() {
                   Cancel
                 </button>
                 <button
-                  type="submit"
-                  className="px-4 py-2 bg-green-500 hover:bg-green-400 text-black rounded-lg"
-                  disabled={loading}
-                >
-                  {loading ? "Processing..." : "Update Profile"}
-                </button>
+  type="submit"
+  className="px-4 py-2 bg-green-500 hover:bg-green-400 text-black rounded-lg"
+  disabled={loading}
+  onClick={() => {
+    setTimeout(() => {
+      window.location.reload();
+    }, 500); // Reload after 500ms (adjust timing as needed)
+  }}
+>
+  {loading ? "Processing..." : "Update Profile"}
+</button>
+
               </div>
             </form>
           </div>
